@@ -46,9 +46,11 @@
                     </div>
                     <div class="">
                         <div class="amount amount-top">
-                            <h2>0.000000</h2>
+                            <form action="/tokenAmount" id="tokenAmount" name="tokenAmount" method="POST">
+                                <input type="text" id="enterAmount" name="enterAmount" placeholder="0.000000" value="<%= amount %>" onchange="document.getElementById('tokenAmount').submit()">
+                            </form>
                         </div>
-                        <div class="amount amount-bottom">Token A Amount</div>
+                        <div class="amount amount-bottom">Enter Token A Amount</div>
                     </div>
                 </div>
                 <div class="swap-main swap">
@@ -73,7 +75,7 @@
                                     <option value="">Select</option>
                                     <% if (locals.symbol) { %>
                                         <% symbol.forEach (tokenSymbol => { %>
-                                        <option value="<%= tokenSymbol %>"><%= tokenSymbol %></option>
+                                        <option value="<%= tokenSymbol %>" <%= tokenSymbol === (token2 || "") ? "selected" : "" %>><%= tokenSymbol %></option>
                                         <% }); %>     
                                     <% } %>             
                                 </select>
