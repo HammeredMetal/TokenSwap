@@ -13,6 +13,7 @@ let resultListed;
 let token = [];
 let symbol = [];
 let cleanAlphPrice;
+let amount;
 
 
 app.get("/", async (req, res) => {
@@ -89,6 +90,7 @@ app.post("/token1", async (req, res) => {
             token1Logo,
             token2: req.body.token2 || "",
             token2Logo: req.body.token2Logo || "",
+            amount,
         });
 
     } catch (error) {
@@ -113,6 +115,7 @@ app.post("/token2", async (req, res) => {
            token2Logo,
            token1: req.body.token1 || "",
            token1Logo: req.body.token1Logo || "", 
+           amount,
         });
 
     } catch (error) {
@@ -122,10 +125,12 @@ app.post("/token2", async (req, res) => {
 
 app.post("/tokenAmount", async (req, res) => {
     try {
-        const amount = req.body.enterAmount;
+        amount = req.body.enterAmount;
+        console.log(`Token A amount is: ${amount}`);
         
         res.render("index.ejs", {
-            amount,
+            amount: amount,
+            symbol,
             cleanAlphPrice: cleanAlphPrice,
             token1: req.body.token1 || "",
             token1Logo: req.body.token1Logo || "", 
@@ -143,7 +148,8 @@ app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
-// Need /amount to pass token and tokenLogo. Ensure all inputted data gets rendered
+// Need /amount to pass token and tokenLogo. Ensure all inputted data gets rendered. 
+// Need functionality added to token amount
 
 
 // Push To Git 
@@ -151,4 +157,4 @@ app.listen(port, () => {
 // 2. git add .
 // 3. or git add filename 
 // 4. git commit -m "Your message here"
-// 5. git push origin main 
+// 5. git push origin master 

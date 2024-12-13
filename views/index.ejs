@@ -47,6 +47,10 @@
                     <div class="">
                         <div class="amount amount-top">
                             <form action="/tokenAmount" id="tokenAmount" name="tokenAmount" method="POST">
+                                <input type="hidden" name="token1" value="<%= token1 || '' %>">
+                                <input type="hidden" name="token1Logo" value="<%= token1Logo || '' %>">
+                                <input type="hidden" name="token2" value="<%= token2 || '' %>">
+                                <input type="hidden" name="token2Logo" value="<%= token2Logo || '' %>">
                                 <input type="text" id="enterAmount" name="enterAmount" placeholder="0.000000" value="<%= amount %>" onchange="document.getElementById('tokenAmount').submit()">
                             </form>
                         </div>
