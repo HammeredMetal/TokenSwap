@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/styles/main.css">
+    <title>Roly's Quick Swap Calculator</title>
+</head>
+<body>
+    <video autoplay muted loop class="video">
+        <source src="/img/202587-918431513_medium.mp4" type="video/mp4">
+      </video>
+
+    <div class="container">
+        <div class="outline">
+            <div class="tab your-value-outline">
+                <div class="your-value tab-content">
+                    Token value: $
+                </div>
+            </div>
+            <div class="main-box">
+                <div class="tokens token1">
+                    <div class="logo logo1">
+                        <% if (locals.token1Logo) { %>
+                            <img class="logo-pic" src="<%=token1Logo %>">
+                        <% } %>
+                    </div>
+                    <div >
+                        <div class="token-choice">
+                            <h2>Token A:</h2>
+                        </div>
+                        <div class="token-choice">
+                        <form action="/token1" id="token1-select" name="token1-select" method="POST" >
+                            <input type="hidden" name="token2" value="<%= token2 || '' %>">
+                            <input type="hidden" name="token2Logo" value="<%= token2Logo || '' %>">
+                            <select onchange="document.getElementById('token1-select').submit()" name="token1">
+                                <option value="">Select</option>
+                                <% if (locals.symbol) { %>
+                                    <% symbol.forEach (tokenSymbol => { %>
+                                    <option value="<%= tokenSymbol %>" <%= tokenSymbol === (token1 || "") ? "selected" : "" %>><%= tokenSymbol %></option>
+                                    <% }); %>     
+                                <% } %>             
+                            </select>
+                        </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <div class="amount amount-top">
+                            <h2>0.000000</h2>
+                        </div>
+                        <div class="amount amount-bottom">Token A Amount</div>
+                    </div>
+                </div>
+                <div class="swap-main swap">
+                    <img src="/img/swap-svgrepo-com.svg" alt="Swap" id="swap-img">
+                </div>
+                <div class="swap-main swap-shadow"></div>
+                <div class="tokens token2">
+                    <div class="logo logo2">                          
+                        <% if (locals.token2Logo) { %>
+                        <img class="logo-pic" src="<%= token2Logo %>">
+                        <% } %> 
+                    </div>
+                    <div>
+                        <div class="token-choice">
+                            <h2>Token B:</h2>
+                        </div>
+                        <div class="token-choice">
+                            <form action="/token2" id="token2-select" name="token2-select" method="POST" >
+                                <input type="hidden" name="token1" value="<%= token1 || '' %>">
+                                <input type="hidden" name="token1Logo" value="<%= token1Logo || '' %>">
+                                <select onchange="document.getElementById('token2-select').submit()" name="token2">
+                                    <option value="">Select</option>
+                                    <% if (locals.symbol) { %>
+                                        <% symbol.forEach (tokenSymbol => { %>
+                                        <option value="<%= tokenSymbol %>"><%= tokenSymbol %></option>
+                                        <% }); %>     
+                                    <% } %>             
+                                </select>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="">
+                        <div class="amount amount-top">
+                            <h2>0.000000</h2>
+                        </div>
+                        <div class="amount amount-bottom">
+                            Equivalent Token B Amount
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="alph-value-outline tab">
+                <div class="alph-value tab-content">Alph Price: $<%= cleanAlphPrice %></div>
+            </div>
+        </div>
+        <div class="outline-right"></div>
+    </div>
+    
+
+
+</body>
+</html>
