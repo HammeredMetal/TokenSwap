@@ -14,16 +14,28 @@ let token = [];
 let symbol = [];
 let cleanAlphPrice;
 let amount;
+let tokenAddress;
+
+// function fixPrice(tokenAddress) {
+//     const response = axios.get(`${API_URL}prices/?address=${tokenAddress}.data`);
+//     const decimal = response.prices[0].token.decimals;
+
+//     console.log("fixPrice response: " + response);
+//     console.log("fixPrice decimal: " + decimal);
+// }
 
 
 app.get("/", async (req, res) => {
     try {
+        // tokenAddress = "tgx7VNFoP9DJiFMFgXXtafQZkUvyEdDHT9ryamHJYrjq";
+        // fixPrice(tokenAddress);
+
         //Display Alephium price in bottom right box
         let responseAlph = await axios.get(API_URL + "prices/?address=tgx7VNFoP9DJiFMFgXXtafQZkUvyEdDHT9ryamHJYrjq");
         let resultAlph = responseAlph.data;
-        let decimal = resultAlph.prices[0].token.decimals;
+        let alphDecimal = resultAlph.prices[0].token.decimals;
         let alphPrice = resultAlph.prices[0].price;
-        let index = alphPrice.length-decimal;
+        let index = alphPrice.length-alphDecimal;
 
 
         function cleanPrice(alphPrice, index) {
@@ -80,8 +92,34 @@ app.post("/token1", async (req, res) => {
         if (index1 === -1) throw new Error(`Token 1 symbol "${token1}" not found.`);
         const token1Address = resultListed[index1].address;
         const token1Logo = resultListed[index1].logo;
+        const responseToken1 = await axios.get(API_URL + "prices/?address=" + token1Address);
+        let token1Price = responseToken1.data.prices[0].price;
+
+
+        let token1Decimal = responseToken1.data.prices[0].token.decimals;
+        let priceLength1 = token1Price.length;
+        while ( priceLength1 < 19) {
+            token1Price = '0'+token1Price;
+            priceLength1 = token1Price.length;
+        }   
+
+        const token1Index = token1Price.length-token1Decimal;
+
+
+        function cleanToken1Price(token1Price, token1index) {
+            if (!token1Price || isNaN(token1Index) || token1Index < 0 || token1Index > token1Price.length) {
+                throw new Error("Invalid token1Price or token1Index for cleaning price.");
+            }
+            let cleanToken1Price = token1Price.substring(0, token1Index) + "." + token1Price.substring(token1Index);
+            cleanToken1Price = cleanToken1Price.slice(0,12);
+            return cleanToken1Price;
+        }
+        cleanToken1Price = cleanToken1Price(token1Price, token1Index);
+
         console.log(`Token 1 symbol is: ${token1}`);
         console.log(`Token  1 address is: ${token1Address}`);
+        console.log(`Token 1 price is: $${cleanToken1Price}`);
+
 
         res.render("index.ejs", {
             cleanAlphPrice: cleanAlphPrice,
@@ -105,8 +143,31 @@ app.post("/token2", async (req, res) => {
         if (index2 === -1) throw new Error(`Token 2 symbol "${token2}" not found.`);
         const token2Address = resultListed[index2].address;
         const token2Logo = resultListed[index2].logo;
+        const responseToken2 = await axios.get(API_URL + "prices/?address=" + token2Address);
+        let token2Price = responseToken2.data.prices[0].price;
+        let token2Decimal = responseToken2.data.prices[0].token.decimals;
+        let priceLength2 = token2Price.length;
+
+        while ( priceLength2 < 19) {
+            token2Price = '0'+token2Price;
+            priceLength2 = token2Price.length;
+        }   
+
+        const token2Index = token2Price.length-token2Decimal;
+
+        function cleanToken2Price(token2Price, token2index) {
+            if (!token2Price || isNaN(token2Index) || token2Index < 0 || token2Index > token2Price.length) {
+                throw new Error("Invalid token2Price or token2Index for cleaning price.");
+            }
+            let cleanToken2Price = token2Price.substring(0, token2Index) + "." + token2Price.substring(token2Index);
+            cleanToken2Price = cleanToken2Price.slice(0,12);
+            return cleanToken2Price;
+        }
+        cleanToken2Price = cleanToken2Price(token2Price, token2Index);
+
         console.log(`Token 2 symbol is: ${token2}`);
         console.log(`Token  2 address is: ${token2Address}`);
+        console.log(`Token 2 price is: $${cleanToken2Price}`);
 
         res.render("index.ejs", {
            cleanAlphPrice: cleanAlphPrice,
@@ -127,6 +188,11 @@ app.post("/tokenAmount", async (req, res) => {
     try {
         amount = req.body.enterAmount;
         console.log(`Token A amount is: ${amount}`);
+
+        if (isNaN(amount)) {
+            amount = "Enter token amount";
+            console.log(amount);
+        }
         
         res.render("index.ejs", {
             amount: amount,
@@ -148,8 +214,8 @@ app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
-// Need /amount to pass token and tokenLogo. Ensure all inputted data gets rendered. 
-// Need functionality added to token amount
+
+// Need functionality added to token amount. Make a function that takes token address and finds price and decimal and returns price with decimal
 
 
 // Push To Git 
