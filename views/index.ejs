@@ -62,7 +62,13 @@
                     </div>
                 </div>
                 <div class="swap-main swap">
-                    <img src="/img/swap-svgrepo-com.svg" alt="Swap" id="swap-img">
+                    <form action="/swap" id="swap" name="swap" method="POST">
+                        <input type="hidden" name="token1" value="<%= token1 || '' %>">
+                        <input type="hidden" name="token1Logo" value="<%= token1Logo || '' %>">
+                        <input type="hidden" name="token2" value="<%= token2 || '' %>">
+                        <input type="hidden" name="token2Logo" value="<%= token2Logo || '' %>">
+                        <input type="image" name="swap-button" src="/img/swap-svgrepo-com.svg" alt="Swap" id="swap-img">
+                    </form>
                 </div>
                 <div class="swap-main swap-shadow"></div>
                 <div class="tokens token2">

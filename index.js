@@ -14,12 +14,37 @@ let token = [];
 let symbol = [];
 let cleanAlphPrice;
 let amount;
-let tokenAddress;
 let value;
 let cleanToken1Price;
-let value2;
 let BEquivalent;
 let cleanToken2Price;
+let valueLength;
+let token1;
+let token2;
+let token1Logo;
+let token2Logo;
+
+function equivalentCalc() {
+    BEquivalent = value / cleanToken2Price;
+    BEquivalent = BEquivalent.toString();
+    let BEquivalentLength = BEquivalent.length;
+    while (BEquivalentLength > 14) {
+        BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
+        BEquivalentLength = BEquivalent.length;
+    }
+    return BEquivalent;
+}
+
+function shrinkValue() {
+    value = cleanToken1Price * amount;
+    value = value.toString();
+    valueLength = value.length;
+
+    while (valueLength > 9) {
+        value = value.substring(0, valueLength-1);
+        valueLength = value.length;
+    }
+}
 
 
 app.get("/", async (req, res) => {
@@ -81,11 +106,11 @@ app.get("/", async (req, res) => {
 
 app.post("/token1", async (req, res) => {
     try {
-        const token1 = req.body.token1;
+        token1 = req.body.token1;
         const index1 = resultListed.findIndex(token => token.symbol === token1);
         if (index1 === -1) throw new Error(`Token 1 symbol "${token1}" not found.`);
         const token1Address = resultListed[index1].address;
-        const token1Logo = resultListed[index1].logo;
+        token1Logo = resultListed[index1].logo;
         const responseToken1 = await axios.get(API_URL + "prices/?address=" + token1Address);
         let token1Price = responseToken1.data.prices[0].price;
 
@@ -110,22 +135,8 @@ app.post("/token1", async (req, res) => {
         }
         cleanToken1Price = priceCleaner1(token1Price, token1Index);
 
-        value = cleanToken1Price * amount;
-        value = value.toString();
-        let valueLength = value.length;
-
-        while (valueLength > 9) {
-            value = value.substring(0, valueLength-1);
-            valueLength = value.length;
-        }
-
-        BEquivalent = value / cleanToken2Price;
-        BEquivalent = BEquivalent.toString();
-        let BEquivalentLength = BEquivalent.length;
-        while (BEquivalentLength > 14) {
-            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
-            BEquivalentLength = BEquivalent.length;
-        }
+        shrinkValue();
+        equivalentCalc();
 
         console.log(`Token 1 symbol is: ${token1}`);
         console.log(`Token  1 address is: ${token1Address}`);
@@ -152,11 +163,11 @@ app.post("/token1", async (req, res) => {
 
 app.post("/token2", async (req, res) => {
     try {
-        const token2 = req.body.token2;
+        token2 = req.body.token2;
         const index2 = resultListed.findIndex(token => token.symbol === token2);
         if (index2 === -1) throw new Error(`Token 2 symbol "${token2}" not found.`);
         const token2Address = resultListed[index2].address;
-        const token2Logo = resultListed[index2].logo;
+        token2Logo = resultListed[index2].logo;
         const responseToken2 = await axios.get(API_URL + "prices/?address=" + token2Address);
         let token2Price = responseToken2.data.prices[0].price;
         let token2Decimal = responseToken2.data.prices[0].token.decimals;
@@ -179,13 +190,7 @@ app.post("/token2", async (req, res) => {
         }
         cleanToken2Price = priceCleaner2(token2Price, token2Index);
 
-        BEquivalent = value / cleanToken2Price;
-        BEquivalent = BEquivalent.toString();
-        let BEquivalentLength = BEquivalent.length;
-        while (BEquivalentLength > 14) {
-            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
-            BEquivalentLength = BEquivalent.length;
-        }
+        equivalentCalc();
 
         console.log(`Equivalent B tokens is: ${BEquivalent}`);
         console.log(`Token 2 symbol is: ${token2}`);
@@ -212,29 +217,15 @@ app.post("/token2", async (req, res) => {
 app.post("/tokenAmount", async (req, res) => {
     try {
         amount = req.body.enterAmount;
-        console.log(`Token A amount is: ${amount}`);
 
         if (isNaN(amount)) {
             amount = "Enter token amount";
-            console.log(amount);
         }
 
-        value = cleanToken1Price * amount;
-        value = value.toString();
-        let valueLength = value.length;
+        shrinkValue();
+        equivalentCalc();
 
-        while (valueLength > 9) {
-            value = value.substring(0, valueLength-1);
-            valueLength = value.length;
-        }
-
-        BEquivalent = value / cleanToken2Price;
-        BEquivalent = BEquivalent.toString();
-        let BEquivalentLength = BEquivalent.length;
-        while (BEquivalentLength > 14) {
-            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
-            BEquivalentLength = BEquivalent.length;
-        }
+        console.log(`Token A amount is: ${amount}`);
         
         res.render("index.ejs", {
             amount: amount,
@@ -253,13 +244,54 @@ app.post("/tokenAmount", async (req, res) => {
     }
 });
 
+app.post("/swap", async (req, res) => {
+    try {
+
+        let token3;
+        token3 = token1;
+        token1 = token2;
+        token2 = token3;
+
+        let token3Logo;
+        token3Logo = token1Logo;
+        token1Logo = token2Logo;
+        token2Logo = token3Logo;
+
+        let cleanToken3Price;
+        cleanToken3Price = cleanToken1Price;
+        cleanToken1Price = cleanToken2Price;
+        cleanToken2Price = cleanToken3Price;
+
+        shrinkValue();
+        equivalentCalc();
+
+        console.log(`New token1 is: ${token1}`);
+        console.log(`New token2 is: ${token2}`);
+
+        res.render("index.ejs", {
+            amount: amount,
+            symbol,
+            cleanAlphPrice: cleanAlphPrice,
+            token1,
+            token1Logo,
+            token2,
+            token2Logo,
+            value,
+            BEquivalent,
+        });
+
+    } catch (error) {
+        res.status(400).send(`Error: ${error.message}`);
+    }
+});
+
 
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 });
 
 
-// Need functionality added to token amount. Make a function that takes token address and finds price and decimal and returns price with decimal
+// Swap feature done. Need to clean code. 
 
 
 // Push To Git 
@@ -268,3 +300,5 @@ app.listen(port, () => {
 // 3. or git add filename 
 // 4. git commit -m "Your message here"
 // 5. git push origin master 
+
+
