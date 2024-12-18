@@ -15,7 +15,11 @@
         <div class="outline">
             <div class="tab your-value-outline">
                 <div class="your-value tab-content">
-                    Token value: $
+                    <% if (typeof value === "undefined" || isNaN(value)) { %>
+                        Token value: $0.00000000
+                        <% } else { %>
+                        Token value: $<%= value %>
+                    <% } %>
                 </div>
             </div>
             <div class="main-box">
@@ -88,7 +92,11 @@
                     </div>
                     <div class="">
                         <div class="amount amount-top">
-                            <h2>0.000000</h2>
+                            <% if (typeof BEquivalent === "undefined" || isNaN(BEquivalent)) { %>
+                                <h2>0.00000000</h2>
+                                <% } else { %>
+                                <h2><%= BEquivalent %></h2>
+                            <% } %>
                         </div>
                         <div class="amount amount-bottom">
                             Equivalent Token B Amount

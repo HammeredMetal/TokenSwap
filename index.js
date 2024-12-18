@@ -15,20 +15,15 @@ let symbol = [];
 let cleanAlphPrice;
 let amount;
 let tokenAddress;
-
-// function fixPrice(tokenAddress) {
-//     const response = axios.get(`${API_URL}prices/?address=${tokenAddress}.data`);
-//     const decimal = response.prices[0].token.decimals;
-
-//     console.log("fixPrice response: " + response);
-//     console.log("fixPrice decimal: " + decimal);
-// }
+let value;
+let cleanToken1Price;
+let value2;
+let BEquivalent;
+let cleanToken2Price;
 
 
 app.get("/", async (req, res) => {
     try {
-        // tokenAddress = "tgx7VNFoP9DJiFMFgXXtafQZkUvyEdDHT9ryamHJYrjq";
-        // fixPrice(tokenAddress);
 
         //Display Alephium price in bottom right box
         let responseAlph = await axios.get(API_URL + "prices/?address=tgx7VNFoP9DJiFMFgXXtafQZkUvyEdDHT9ryamHJYrjq");
@@ -48,8 +43,6 @@ app.get("/", async (req, res) => {
         }
         cleanAlphPrice = cleanPrice(alphPrice, index);
         console.log(`Alph price is: $${cleanAlphPrice}`);
-        console.log(resultAlph);
-
 
         //Get listed tokens and insert into arrays "address" and "symbol".
         const responseListed = await axios.get(API_URL + "tokens/?listed=true");
@@ -76,6 +69,7 @@ app.get("/", async (req, res) => {
             token1Logo: "",
             token2Logo: "",
             amount: "",
+            value: "",
         });
     } catch (error) {
         console.error("Failed to make GET request: ", error.message);
@@ -106,20 +100,37 @@ app.post("/token1", async (req, res) => {
         const token1Index = token1Price.length-token1Decimal;
 
 
-        function cleanToken1Price(token1Price, token1index) {
+        function priceCleaner1(token1Price, token1index) {
             if (!token1Price || isNaN(token1Index) || token1Index < 0 || token1Index > token1Price.length) {
                 throw new Error("Invalid token1Price or token1Index for cleaning price.");
             }
             let cleanToken1Price = token1Price.substring(0, token1Index) + "." + token1Price.substring(token1Index);
-            cleanToken1Price = cleanToken1Price.slice(0,12);
+            cleanToken1Price = cleanToken1Price.slice(0,9);
             return cleanToken1Price;
         }
-        cleanToken1Price = cleanToken1Price(token1Price, token1Index);
+        cleanToken1Price = priceCleaner1(token1Price, token1Index);
+
+        value = cleanToken1Price * amount;
+        value = value.toString();
+        let valueLength = value.length;
+
+        while (valueLength > 9) {
+            value = value.substring(0, valueLength-1);
+            valueLength = value.length;
+        }
+
+        BEquivalent = value / cleanToken2Price;
+        BEquivalent = BEquivalent.toString();
+        let BEquivalentLength = BEquivalent.length;
+        while (BEquivalentLength > 14) {
+            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
+            BEquivalentLength = BEquivalent.length;
+        }
 
         console.log(`Token 1 symbol is: ${token1}`);
         console.log(`Token  1 address is: ${token1Address}`);
         console.log(`Token 1 price is: $${cleanToken1Price}`);
-
+        console.log(`Token value is: $${value}`);
 
         res.render("index.ejs", {
             cleanAlphPrice: cleanAlphPrice,
@@ -129,6 +140,9 @@ app.post("/token1", async (req, res) => {
             token2: req.body.token2 || "",
             token2Logo: req.body.token2Logo || "",
             amount,
+            value,
+            cleanToken1Price,
+            BEquivalent,
         });
 
     } catch (error) {
@@ -155,16 +169,25 @@ app.post("/token2", async (req, res) => {
 
         const token2Index = token2Price.length-token2Decimal;
 
-        function cleanToken2Price(token2Price, token2index) {
+        function priceCleaner2(token2Price, token2index) {
             if (!token2Price || isNaN(token2Index) || token2Index < 0 || token2Index > token2Price.length) {
                 throw new Error("Invalid token2Price or token2Index for cleaning price.");
             }
             let cleanToken2Price = token2Price.substring(0, token2Index) + "." + token2Price.substring(token2Index);
-            cleanToken2Price = cleanToken2Price.slice(0,12);
+            cleanToken2Price = cleanToken2Price.slice(0,9);
             return cleanToken2Price;
         }
-        cleanToken2Price = cleanToken2Price(token2Price, token2Index);
+        cleanToken2Price = priceCleaner2(token2Price, token2Index);
 
+        BEquivalent = value / cleanToken2Price;
+        BEquivalent = BEquivalent.toString();
+        let BEquivalentLength = BEquivalent.length;
+        while (BEquivalentLength > 14) {
+            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
+            BEquivalentLength = BEquivalent.length;
+        }
+
+        console.log(`Equivalent B tokens is: ${BEquivalent}`);
         console.log(`Token 2 symbol is: ${token2}`);
         console.log(`Token  2 address is: ${token2Address}`);
         console.log(`Token 2 price is: $${cleanToken2Price}`);
@@ -177,6 +200,8 @@ app.post("/token2", async (req, res) => {
            token1: req.body.token1 || "",
            token1Logo: req.body.token1Logo || "", 
            amount,
+           value,
+           BEquivalent,
         });
 
     } catch (error) {
@@ -193,6 +218,23 @@ app.post("/tokenAmount", async (req, res) => {
             amount = "Enter token amount";
             console.log(amount);
         }
+
+        value = cleanToken1Price * amount;
+        value = value.toString();
+        let valueLength = value.length;
+
+        while (valueLength > 9) {
+            value = value.substring(0, valueLength-1);
+            valueLength = value.length;
+        }
+
+        BEquivalent = value / cleanToken2Price;
+        BEquivalent = BEquivalent.toString();
+        let BEquivalentLength = BEquivalent.length;
+        while (BEquivalentLength > 14) {
+            BEquivalent = BEquivalent.substring(0, BEquivalentLength-1);
+            BEquivalentLength = BEquivalent.length;
+        }
         
         res.render("index.ejs", {
             amount: amount,
@@ -202,6 +244,8 @@ app.post("/tokenAmount", async (req, res) => {
             token1Logo: req.body.token1Logo || "", 
             token2: req.body.token2 || "",
             token2Logo: req.body.token2Logo || "",
+            value,
+            BEquivalent,
         });
 
     } catch (error) {
