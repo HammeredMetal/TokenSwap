@@ -18,13 +18,22 @@ let value;
 let cleanToken1Price;
 let BEquivalent;
 let cleanToken2Price;
-let valueLength;
 let token1;
 let token2;
 let token1Logo;
 let token2Logo;
 
+//Calculate number of token B equivalent to token A
 function equivalentCalc() {
+    value = cleanToken1Price * amount;
+    value = value.toString();
+    let valueLength = value.length;
+
+    while (valueLength > 9) {
+        value = value.substring(0, valueLength-1);
+        valueLength = value.length;
+    }
+
     BEquivalent = value / cleanToken2Price;
     BEquivalent = BEquivalent.toString();
     let BEquivalentLength = BEquivalent.length;
@@ -33,17 +42,6 @@ function equivalentCalc() {
         BEquivalentLength = BEquivalent.length;
     }
     return BEquivalent;
-}
-
-function shrinkValue() {
-    value = cleanToken1Price * amount;
-    value = value.toString();
-    valueLength = value.length;
-
-    while (valueLength > 9) {
-        value = value.substring(0, valueLength-1);
-        valueLength = value.length;
-    }
 }
 
 
@@ -77,6 +75,7 @@ app.get("/", async (req, res) => {
             throw new Error("Token list is not loaded yet. Please refresh the page.");
         }
 
+        //Push listed token symbols into array for dropdown lists
         resultListed.forEach(listedToken => {
             token.push(listedToken);
         });
@@ -106,6 +105,7 @@ app.get("/", async (req, res) => {
 
 app.post("/token1", async (req, res) => {
     try {
+        //Isolate required data for token 1
         token1 = req.body.token1;
         const index1 = resultListed.findIndex(token => token.symbol === token1);
         if (index1 === -1) throw new Error(`Token 1 symbol "${token1}" not found.`);
@@ -114,7 +114,7 @@ app.post("/token1", async (req, res) => {
         const responseToken1 = await axios.get(API_URL + "prices/?address=" + token1Address);
         let token1Price = responseToken1.data.prices[0].price;
 
-
+        //Insert decimal in appropriate place (kinda)
         let token1Decimal = responseToken1.data.prices[0].token.decimals;
         let priceLength1 = token1Price.length;
         while ( priceLength1 < 19) {
@@ -135,7 +135,6 @@ app.post("/token1", async (req, res) => {
         }
         cleanToken1Price = priceCleaner1(token1Price, token1Index);
 
-        shrinkValue();
         equivalentCalc();
 
         console.log(`Token 1 symbol is: ${token1}`);
@@ -163,6 +162,7 @@ app.post("/token1", async (req, res) => {
 
 app.post("/token2", async (req, res) => {
     try {
+        //Isolate required data for token 2
         token2 = req.body.token2;
         const index2 = resultListed.findIndex(token => token.symbol === token2);
         if (index2 === -1) throw new Error(`Token 2 symbol "${token2}" not found.`);
@@ -170,6 +170,8 @@ app.post("/token2", async (req, res) => {
         token2Logo = resultListed[index2].logo;
         const responseToken2 = await axios.get(API_URL + "prices/?address=" + token2Address);
         let token2Price = responseToken2.data.prices[0].price;
+
+        //Insert decimal in appropriate place (kinda)
         let token2Decimal = responseToken2.data.prices[0].token.decimals;
         let priceLength2 = token2Price.length;
 
@@ -222,7 +224,6 @@ app.post("/tokenAmount", async (req, res) => {
             amount = "Enter token amount";
         }
 
-        shrinkValue();
         equivalentCalc();
 
         console.log(`Token A amount is: ${amount}`);
@@ -246,23 +247,11 @@ app.post("/tokenAmount", async (req, res) => {
 
 app.post("/swap", async (req, res) => {
     try {
+        //Swap chosen token order
+        [token1, token2] = [token2, token1];
+        [token1Logo, token2Logo] = [token2Logo, token1Logo];
+        [cleanToken1Price, cleanToken2Price] = [cleanToken2Price, cleanToken1Price];
 
-        let token3;
-        token3 = token1;
-        token1 = token2;
-        token2 = token3;
-
-        let token3Logo;
-        token3Logo = token1Logo;
-        token1Logo = token2Logo;
-        token2Logo = token3Logo;
-
-        let cleanToken3Price;
-        cleanToken3Price = cleanToken1Price;
-        cleanToken1Price = cleanToken2Price;
-        cleanToken2Price = cleanToken3Price;
-
-        shrinkValue();
         equivalentCalc();
 
         console.log(`New token1 is: ${token1}`);
